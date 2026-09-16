@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Bookmark, Check, Play, Star, X } from 'lucide-react';
+import { Bookmark, Check, Layers, Play, Star, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import {
   fetchTMDBLogo,
   getBackdropUrl,
+  getCollectionDetails,
   getMovieDetails,
   getPosterUrl,
   getTVDetails,
   getTVSeasonDetails,
 } from '../services/tmdb';
-import type { MediaDetails, TVSeasonDetails } from '../types/tmdb';
+import type { CollectionDetails, MediaDetails, TVSeasonDetails } from '../types/tmdb';
 import { MediaCard } from './MediaCard';
 
 export const DetailsModal: React.FC = () => {
   const { selectedMedia, closeDetails, playMedia, isInWatchlist, toggleWatchlist } = useApp();
   const [details, setDetails] = useState<MediaDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'episodes' | 'recommendations'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'episodes' | 'collection' | 'recommendations'>('overview');
   const [logoPath, setLogoPath] = useState<string | null>(null);
 
   // TV Season state
@@ -24,11 +25,16 @@ export const DetailsModal: React.FC = () => {
   const [seasonData, setSeasonData] = useState<TVSeasonDetails | null>(null);
   const [seasonLoading, setSeasonLoading] = useState(false);
 
+  // Collection state
+  const [collectionData, setCollectionData] = useState<CollectionDetails | null>(null);
+  const [collectionLoading, setCollectionLoading] = useState(false);
+
   useEffect(() => {
     if (!selectedMedia) return;
 
     let isMounted = true;
     setLogoPath(null);
+    setCollectionData(null);
 
     const isTv = selectedMedia.media_type === 'tv' || (!selectedMedia.title && !!selectedMedia.name);
     fetchTMDBLogo(selectedMedia.id, isTv ? 'tv' : 'movie').then((path) => {
@@ -86,6 +92,31 @@ export const DetailsModal: React.FC = () => {
       isMounted = false;
     };
   }, [details, selectedSeason]);
+
+  // Fetch Collection Details when Collection tab is selected
+  useEffect(() => {
+    if (activeTab !== 'collection' || !details?.belongs_to_collection?.id) return;
+    if (collectionData && collectionData.id === details.belongs_to_collection.id) return;
+
+    let isMounted = true;
+    const fetchCollection = async () => {
+      setCollectionLoading(true);
+      try {
+        const data = await getCollectionDetails(details.belongs_to_collection!.id);
+        if (isMounted) setCollectionData(data);
+      } catch (err) {
+        console.error('Error fetching collection details:', err);
+        if (isMounted) setCollectionData(null);
+      } finally {
+        if (isMounted) setCollectionLoading(false);
+      }
+    };
+
+    fetchCollection();
+    return () => {
+      isMounted = false;
+    };
+  }, [activeTab, details, collectionData]);
 
   // Key press to close
   useEffect(() => {
@@ -221,6 +252,20 @@ export const DetailsModal: React.FC = () => {
                   {details.number_of_seasons}
                 </span>
               )}
+            </button>
+          )}
+
+          {details?.belongs_to_collection && (
+            <button
+              onClick={() => setActiveTab('collection')}
+              className={`py-3.5 border-b-2 transition-colors flex items-center space-x-2 ${
+                activeTab === 'collection'
+                  ? 'border-amber-500 text-amber-400'
+                  : 'border-transparent text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Layers className="w-4 h-4" />
+              <span>Collection</span>
             </button>
           )}
 
@@ -392,7 +437,66 @@ export const DetailsModal: React.FC = () => {
                 </div>
               )}
 
-              {/* TAB 3: RECOMMENDATIONS */}
+              {/* TAB 3: COLLECTION (FOR MOVIE FRANCHISES) */}
+              {activeTab === 'collection' && details?.belongs_to_collection && (
+                <div className="space-y-6">
+                  {collectionLoading ? (
+                    <div className="py-12 text-center text-slate-400 flex items-center justify-center space-x-2">
+                      <div className="w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+                      <span>Loading movie collection...</span>
+                    </div>
+                  ) : collectionData ? (
+                    <div className="space-y-6">
+                      {/* Collection Header Banner */}
+                      <div className="relative rounded-2xl overflow-hidden border border-slate-800 p-6 bg-slate-950/80 flex flex-col sm:flex-row items-center gap-6">
+                        {collectionData.backdrop_path && (
+                          <div
+                            className="absolute inset-0 opacity-20 bg-cover bg-center pointer-events-none"
+                            style={{ backgroundImage: `url(${getBackdropUrl(collectionData.backdrop_path, 'w1280')})` }}
+                          />
+                        )}
+                        <img
+                          src={getPosterUrl(collectionData.poster_path || details.poster_path, 'w185')}
+                          alt={collectionData.name}
+                          className="relative z-10 w-28 h-40 object-cover rounded-xl border border-slate-700 shadow-xl flex-shrink-0"
+                        />
+                        <div className="relative z-10 space-y-2 text-center sm:text-left flex-1">
+                          <span className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-extrabold uppercase tracking-wider">
+                            Movie Franchise
+                          </span>
+                          <h3 className="text-xl sm:text-2xl font-black text-white">{collectionData.name}</h3>
+                          {collectionData.overview && (
+                            <p className="text-xs sm:text-sm text-slate-300 line-clamp-3 leading-relaxed">
+                              {collectionData.overview}
+                            </p>
+                          )}
+                          <p className="text-xs font-semibold text-slate-400 pt-1">
+                            {collectionData.parts.length} {collectionData.parts.length === 1 ? 'film' : 'films'} in this collection
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Collection Parts Grid */}
+                      <div>
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4">
+                          Films in chronological order
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                          {collectionData.parts.map((item) => (
+                            <MediaCard key={item.id} item={item} isGrid />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-slate-400">
+                      Collection details unavailable.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* TAB 4: RECOMMENDATIONS */}
               {activeTab === 'recommendations' && (
                 <div>
                   {details?.recommendations?.results && details.recommendations.results.length > 0 ? (

@@ -18,7 +18,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80 transition-all duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div className="max-w-[1720px] mx-auto px-3.5 sm:px-6 lg:px-8 xl:px-10 h-16 flex items-center justify-between gap-4">
         {/* Brand Logo */}
         <div className="flex items-center space-x-8">
           <button
@@ -60,24 +60,24 @@ export const Navbar: React.FC = () => {
         </div>
 
         {/* Right Section: Search & DMCA */}
-        <div className="flex items-center space-x-3 flex-1 justify-end max-w-md">
+        <div className="flex items-center space-x-2 sm:space-x-3 flex-1 justify-end max-w-xs sm:max-w-md min-w-0">
           <InstantSearch />
 
           {/* DMCA / Info Icon */}
           <button
             onClick={() => setIsDMCAModalOpen(true)}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent hover:border-slate-700/60 transition-all duration-200"
+            className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent hover:border-slate-700/60 transition-all duration-200 shrink-0"
             title="DMCA & Legal Notice"
           >
-            <Info className="w-5 h-5" />
+            <Info className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
 
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors"
+            className="md:hidden p-1.5 sm:p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/60 transition-colors shrink-0"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <Menu className="w-5 h-5 sm:w-6 sm:h-6" />}
           </button>
         </div>
       </div>

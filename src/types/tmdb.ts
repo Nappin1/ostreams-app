@@ -21,6 +21,23 @@ export interface MediaItem {
   tagline?: string;
   networks?: Network[];
   production_companies?: Company[];
+  adult?: boolean;
+}
+
+export interface CollectionSummary {
+  id: number;
+  name: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+}
+
+export interface CollectionDetails {
+  id: number;
+  name: string;
+  overview?: string;
+  poster_path: string | null;
+  backdrop_path: string | null;
+  parts: MediaItem[];
 }
 
 export interface Genre {
@@ -90,6 +107,7 @@ export interface MediaDetails extends MediaItem {
     results: MediaItem[];
   };
   seasons?: TVSeasonDetails[];
+  belongs_to_collection?: CollectionSummary | null;
 }
 
 export interface PlayerSource {

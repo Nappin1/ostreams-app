@@ -69,7 +69,7 @@ export const HeroCarousel: React.FC<HeroCarouselProps> = ({ items }) => {
       </div>
 
       {/* Content Container */}
-      <div className="relative h-full max-w-7xl mx-auto px-6 sm:px-10 lg:px-12 flex items-end pb-12 sm:pb-16 z-10">
+      <div className="relative h-full max-w-[1720px] mx-auto px-5 sm:px-8 lg:px-10 flex items-end pb-12 sm:pb-16 z-10">
         <div className="max-w-2xl space-y-4 sm:space-y-6">
           {/* Metadata Badges */}
           <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm font-semibold text-slate-300">

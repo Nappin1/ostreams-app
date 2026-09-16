@@ -1,4 +1,4 @@
-import type { Genre, MediaDetails, MediaItem, TVSeasonDetails } from '../types/tmdb';
+import type { CollectionDetails, Genre, MediaDetails, MediaItem, TVSeasonDetails } from '../types/tmdb';
 
 const API_KEY = '3fd2be6f0c70a2a598f084ddfb75487c';
 const BASE_URL = 'https://api.themoviedb.org/3';
@@ -10,6 +10,9 @@ const EXCLUDED_TV_GENRES = [10763, 10767, 10764]; // News, Talk, Reality
 
 export function filterUnwantedGenres(items: MediaItem[]): MediaItem[] {
   return items.filter((item) => {
+    // Filter out adult content
+    if (item.adult === true) return false;
+
     const isMovie = item.media_type === 'movie' || !!item.title;
     if (isMovie) {
       if (item.genre_ids?.some((g) => EXCLUDED_MOVIE_GENRES.includes(g))) return false;
@@ -33,6 +36,7 @@ export function getBackdropUrl(path: string | null, size: 'w780' | 'w1280' | 'or
 async function fetchFromTMDB<T>(endpoint: string, params: Record<string, string | number> = {}): Promise<T> {
   const url = new URL(`${BASE_URL}${endpoint}`);
   url.searchParams.append('api_key', API_KEY);
+  url.searchParams.append('include_adult', 'false');
 
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
@@ -114,6 +118,15 @@ export async function getTVDetails(id: number): Promise<MediaDetails> {
 
 export async function getTVSeasonDetails(id: number, seasonNumber: number): Promise<TVSeasonDetails> {
   return fetchFromTMDB<TVSeasonDetails>(`/tv/${id}/season/${seasonNumber}`);
+}
+
+export async function getCollectionDetails(collectionId: number): Promise<CollectionDetails> {
+  const data = await fetchFromTMDB<CollectionDetails>(`/collection/${collectionId}`);
+  const parts = (data.parts || []).map((item) => ({ ...item, media_type: 'movie' as const }));
+  return {
+    ...data,
+    parts: filterUnwantedGenres(parts),
+  };
 }
 
 const logoCache: Record<string, string | null> = {};

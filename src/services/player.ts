@@ -1,7 +1,7 @@
 import type { PlayerSource } from '../types/tmdb';
 
 export const PLAYER_SOURCES: PlayerSource[] = [
-  { id: 'vaplayer', name: 'VaPlayer', baseUrl: 'https://vaplayer.ru', badge: 'Server 1 (Fast)' },
+  { id: 'vaplayer', name: 'VaPlayer', baseUrl: 'https://apiplayer.ru', badge: 'Server 1 (Fast)' },
   { id: 'vidsrc-embed', name: 'VidSrc Embed', baseUrl: 'https://vidsrc-embed.ru', badge: 'Server 2 (HD)' },
   { id: 'vidsrc-icu', name: 'VidSrc ICU', baseUrl: 'https://vidsrc.icu', badge: 'Server 3 (Multi-Sub)' },
   { id: 'vidlink', name: 'VidLink', baseUrl: 'https://vidlink.pro', badge: 'Server 4 (Pro)' },

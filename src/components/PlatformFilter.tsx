@@ -8,31 +8,145 @@ export interface DiscoverTarget {
   targetId: number;
   color: string;
   badge: string;
+  logoUrl?: string;
 }
 
 export const STREAMING_PROVIDERS: DiscoverTarget[] = [
-  { id: 'netflix', name: 'Netflix', kind: 'provider', targetId: 8, color: 'from-red-600 to-rose-700', badge: 'N' },
-  { id: 'disney', name: 'Disney+', kind: 'provider', targetId: 337, color: 'from-blue-600 to-indigo-700', badge: 'D+' },
-  { id: 'appletv', name: 'Apple TV+', kind: 'provider', targetId: 350, color: 'from-slate-700 to-slate-900', badge: 'tv+' },
-  { id: 'prime', name: 'Prime Video', kind: 'provider', targetId: 9, color: 'from-cyan-600 to-blue-700', badge: 'PRIME' },
-  { id: 'hbo', name: 'HBO Max', kind: 'provider', targetId: 1899, color: 'from-purple-600 to-indigo-800', badge: 'MAX' },
-  { id: 'hulu', name: 'Hulu', kind: 'provider', targetId: 15, color: 'from-emerald-500 to-teal-700', badge: 'hulu' },
-  { id: 'paramount', name: 'Paramount+', kind: 'provider', targetId: 531, color: 'from-blue-500 to-sky-700', badge: 'P+' },
+  {
+    id: 'netflix',
+    name: 'Netflix',
+    kind: 'provider',
+    targetId: 8,
+    color: 'from-red-900/60 via-slate-900 to-slate-950 hover:border-red-500/50',
+    badge: 'N',
+    logoUrl: 'https://image.tmdb.org/t/p/w500/9A1JSVm2AAY2yR4qvMWhIOAFiMF.png',
+  },
+  {
+    id: 'disney',
+    name: 'Disney+',
+    kind: 'provider',
+    targetId: 337,
+    color: 'from-blue-900/60 via-slate-900 to-slate-950 hover:border-blue-500/50',
+    badge: 'D+',
+    logoUrl: 'https://image.tmdb.org/t/p/w500/97yvRBwRJZdLflmYVquKQz3489P.png',
+  },
+  {
+    id: 'appletv',
+    name: 'Apple TV+',
+    kind: 'provider',
+    targetId: 350,
+    color: 'from-slate-800/80 via-slate-900 to-slate-950 hover:border-slate-400/50',
+    badge: 'tv+',
+    logoUrl: 'https://image.tmdb.org/t/p/w500/2E03pXt812xWXZwPJkYwwke8MCG.png',
+  },
+  {
+    id: 'prime',
+    name: 'Prime Video',
+    kind: 'provider',
+    targetId: 9,
+    color: 'from-sky-900/60 via-slate-900 to-slate-950 hover:border-sky-400/50',
+    badge: 'PRIME',
+    logoUrl: 'https://image.tmdb.org/t/p/w500/dQeAar5H9P23wqLH4jR0f7A667.png',
+  },
+  {
+    id: 'hbo',
+    name: 'Max',
+    kind: 'provider',
+    targetId: 1899,
+    color: 'from-purple-900/60 via-slate-900 to-slate-950 hover:border-purple-500/50',
+    badge: 'MAX',
+    logoUrl: 'https://image.tmdb.org/t/p/w500/nm8nQO3bT1U9W7m6562gG13885.png',
+  },
+  {
+    id: 'hulu',
+    name: 'Hulu',
+    kind: 'provider',
+    targetId: 15,
+    color: 'from-emerald-900/60 via-slate-900 to-slate-950 hover:border-emerald-500/50',
+    badge: 'hulu',
+    logoUrl: 'https://image.tmdb.org/t/p/w500/pqUTCleNUiTL2LE5bYFjFw1B32f.png',
+  },
+  {
+    id: 'paramount',
+    name: 'Paramount+',
+    kind: 'provider',
+    targetId: 531,
+    color: 'from-blue-900/60 via-slate-900 to-slate-950 hover:border-sky-500/50',
+    badge: 'P+',
+    logoUrl: 'https://image.tmdb.org/t/p/w500/fzvo2J0yG4a1V1l.png',
+  },
 ];
 
 export const TV_NETWORKS: DiscoverTarget[] = [
-  { id: 'hbo-net', name: 'HBO', kind: 'network', targetId: 49, color: 'from-purple-900 to-slate-900', badge: 'HBO' },
-  { id: 'netflix-net', name: 'Netflix Original', kind: 'network', targetId: 213, color: 'from-red-700 to-slate-900', badge: 'NETFLIX' },
-  { id: 'amc-net', name: 'AMC', kind: 'network', targetId: 43, color: 'from-amber-600 to-slate-900', badge: 'AMC' },
-  { id: 'cw-net', name: 'The CW', kind: 'network', targetId: 71, color: 'from-emerald-600 to-slate-900', badge: 'CW' },
-  { id: 'bbc-net', name: 'BBC One', kind: 'network', targetId: 4, color: 'from-red-800 to-slate-900', badge: 'BBC' },
-  { id: 'fx-net', name: 'FX Networks', kind: 'network', targetId: 88, color: 'from-slate-800 to-slate-950', badge: 'FX' },
-  { id: 'showtime-net', name: 'Showtime', kind: 'network', targetId: 67, color: 'from-rose-800 to-slate-900', badge: 'SHOWTIME' },
+  {
+    id: 'hbo-net',
+    name: 'HBO',
+    kind: 'network',
+    targetId: 49,
+    color: 'from-purple-900/60 via-slate-900 to-slate-950 hover:border-purple-500/50',
+    badge: 'HBO',
+    logoUrl: 'https://image.tmdb.org/t/p/w500/TuWyHzGie6fG9T4V9m1d.png',
+  },
+  {
+    id: 'netflix-net',
+    name: 'Netflix Original',
+    kind: 'network',
+    targetId: 213,
+    color: 'from-red-900/60 via-slate-900 to-slate-950 hover:border-red-500/50',
+    badge: 'NETFLIX',
+    logoUrl: 'https://image.tmdb.org/t/p/w500/wwemzKW82xHorFiVUhF8R2vFmy.png',
+  },
+  {
+    id: 'amc-net',
+    name: 'AMC',
+    kind: 'network',
+    targetId: 43,
+    color: 'from-amber-900/60 via-slate-900 to-slate-950 hover:border-amber-500/50',
+    badge: 'AMC',
+    logoUrl: 'https://image.tmdb.org/t/p/w500/1DSpJ22oV6bTZ535.png',
+  },
+  {
+    id: 'cw-net',
+    name: 'The CW',
+    kind: 'network',
+    targetId: 71,
+    color: 'from-emerald-900/60 via-slate-900 to-slate-950 hover:border-emerald-500/50',
+    badge: 'CW',
+    logoUrl: 'https://image.tmdb.org/t/p/w500/26s64a0v2008.png',
+  },
+  {
+    id: 'bbc-net',
+    name: 'BBC One',
+    kind: 'network',
+    targetId: 4,
+    color: 'from-rose-900/60 via-slate-900 to-slate-950 hover:border-rose-500/50',
+    badge: 'BBC',
+    logoUrl: 'https://image.tmdb.org/t/p/w500/5mG3a085.png',
+  },
+  {
+    id: 'fx-net',
+    name: 'FX',
+    kind: 'network',
+    targetId: 88,
+    color: 'from-slate-800/80 via-slate-900 to-slate-950 hover:border-amber-500/50',
+    badge: 'FX',
+    logoUrl: 'https://image.tmdb.org/t/p/w500/a3i088.png',
+  },
+  {
+    id: 'showtime-net',
+    name: 'Showtime',
+    kind: 'network',
+    targetId: 67,
+    color: 'from-red-950/80 via-slate-900 to-slate-950 hover:border-rose-500/50',
+    badge: 'SHOWTIME',
+    logoUrl: 'https://image.tmdb.org/t/p/w500/pE1K.png',
+  },
 ];
 
 export const PlatformFilter: React.FC = () => {
   const { setActivePage, setSearchQuery, setSelectedProvider } = useApp();
   const [activeTab, setActiveTab] = useState<'providers' | 'networks'>('providers');
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
   const handleSelectTarget = (target: DiscoverTarget) => {
     setSearchQuery('');
@@ -45,6 +159,10 @@ export const PlatformFilter: React.FC = () => {
   };
 
   const list = activeTab === 'providers' ? STREAMING_PROVIDERS : TV_NETWORKS;
+
+  const handleImageError = (id: string) => {
+    setImgErrors((prev) => ({ ...prev, [id]: true }));
+  };
 
   return (
     <section className="mb-10">
@@ -62,7 +180,7 @@ export const PlatformFilter: React.FC = () => {
             onClick={() => setActiveTab('providers')}
             className={`px-4 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${
               activeTab === 'providers'
-                ? 'bg-amber-500 text-slate-950 shadow'
+                ? 'bg-amber-500 text-slate-950 shadow-md font-extrabold'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -72,7 +190,7 @@ export const PlatformFilter: React.FC = () => {
             onClick={() => setActiveTab('networks')}
             className={`px-4 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all ${
               activeTab === 'networks'
-                ? 'bg-amber-500 text-slate-950 shadow'
+                ? 'bg-amber-500 text-slate-950 shadow-md font-extrabold'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
@@ -86,15 +204,36 @@ export const PlatformFilter: React.FC = () => {
           <button
             key={p.id}
             onClick={() => handleSelectTarget(p)}
-            className={`group relative h-20 rounded-2xl bg-gradient-to-br ${p.color} border border-white/10 shadow-lg p-3 flex flex-col justify-between items-start overflow-hidden hover:scale-105 transition-all duration-300 cursor-pointer`}
+            className={`group relative h-24 sm:h-28 rounded-2xl bg-gradient-to-br ${p.color} border border-slate-800 shadow-xl p-3 flex flex-col justify-between items-start overflow-hidden hover:scale-105 transition-all duration-300 cursor-pointer hover:shadow-2xl`}
           >
-            <div className="absolute right-2 bottom-1 opacity-20 group-hover:opacity-30 text-white font-black text-2xl sm:text-3xl select-none transition-opacity">
-              {p.badge}
+            {/* Background Glow */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+
+            {/* Badge pill */}
+            <div className="relative z-10 w-full flex items-center justify-between">
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-300 bg-black/50 px-2 py-0.5 rounded-md border border-white/10 backdrop-blur-md">
+                {p.badge}
+              </span>
             </div>
-            <span className="text-xs font-bold uppercase tracking-wider text-white/90 bg-black/30 px-2 py-0.5 rounded-md backdrop-blur-sm">
-              {p.badge}
-            </span>
-            <span className="text-xs sm:text-sm font-extrabold text-white group-hover:translate-x-1 transition-transform truncate max-w-full">
+
+            {/* Logo Image or Text Fallback */}
+            <div className="relative z-10 my-auto flex items-center justify-center w-full h-10">
+              {p.logoUrl && !imgErrors[p.id] ? (
+                <img
+                  src={p.logoUrl}
+                  alt={p.name}
+                  onError={() => handleImageError(p.id)}
+                  className="max-h-10 max-w-[85%] object-contain drop-shadow-lg group-hover:scale-110 transition-transform duration-300 filter brightness-110"
+                />
+              ) : (
+                <span className="text-lg font-black tracking-widest text-white/90 uppercase drop-shadow">
+                  {p.badge}
+                </span>
+              )}
+            </div>
+
+            {/* Name label */}
+            <span className="relative z-10 text-xs font-bold text-slate-200 group-hover:text-amber-400 transition-colors truncate max-w-full">
               {p.name}
             </span>
           </button>

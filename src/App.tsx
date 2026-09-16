@@ -18,7 +18,7 @@ const MainContent: React.FC = () => {
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-amber-500 selection:text-slate-950 flex flex-col">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 max-w-[1720px] w-full mx-auto px-3.5 sm:px-6 lg:px-8 xl:px-10 py-6">
         {activePage === 'home' && <HomePage />}
         {activePage === 'movies' && <MoviesPage />}
         {activePage === 'tv' && <TVShowsPage />}
@@ -29,7 +29,7 @@ const MainContent: React.FC = () => {
 
       {/* Footer */}
       <footer className="border-t border-slate-900 bg-slate-950 py-10 mt-16 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+        <div className="max-w-[1720px] mx-auto px-3.5 sm:px-6 lg:px-8 xl:px-10 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div>
             <span className="font-extrabold text-white text-base tracking-tight">
               O<span className="text-amber-400">STREAM</span>

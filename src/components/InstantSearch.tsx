@@ -58,30 +58,30 @@ export const InstantSearch: React.FC = () => {
 
   return (
     <div ref={dropdownRef} className="relative w-full max-w-md">
-      <form onSubmit={handleFullSearch} className="relative">
+      <form onSubmit={handleFullSearch} className="relative w-full">
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onFocus={() => searchQuery.trim().length >= 2 && setIsOpen(true)}
-          placeholder="Search movies, TV shows..."
-          className="w-full bg-slate-900/80 text-slate-100 placeholder-slate-400 pl-10 pr-10 py-2 rounded-full border border-slate-700/60 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-sm transition-all duration-200 shadow-inner"
+          placeholder="Search movies, TV..."
+          className="w-full bg-slate-900/80 text-slate-100 placeholder-slate-400 pl-8 pr-8 sm:pl-10 sm:pr-10 py-1.5 sm:py-2 rounded-full border border-slate-700/60 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-xs sm:text-sm transition-all duration-200 shadow-inner"
         />
-        <Search className="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400" />
+        <Search className="absolute left-2.5 sm:left-3.5 top-2 sm:top-2.5 w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 pointer-events-none" />
         {searchQuery && (
           <button
             type="button"
             onClick={() => setSearchQuery('')}
-            className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200 transition-colors"
+            className="absolute right-2.5 sm:right-3 top-2 sm:top-2.5 text-slate-400 hover:text-slate-200 transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
         )}
       </form>
 
       {/* Live Dropdown Overlay */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-x-3 top-16 sm:absolute sm:inset-x-auto sm:top-full sm:left-0 sm:right-0 sm:w-full mt-2 bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200 max-h-[75vh] sm:max-h-[80vh] overflow-y-auto">
           {loading ? (
             <div className="p-4 text-center text-slate-400 text-sm flex items-center justify-center space-x-2">
               <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
@@ -103,19 +103,19 @@ export const InstantSearch: React.FC = () => {
                   <button
                     key={`${item.media_type}-${item.id}`}
                     onClick={() => handleSelect(item)}
-                    className="w-full px-4 py-2.5 flex items-center space-x-3 hover:bg-slate-800/70 transition-colors text-left group"
+                    className="w-full px-3 sm:px-4 py-2.5 flex items-center space-x-3 hover:bg-slate-800/70 transition-colors text-left group"
                   >
                     <img
                       src={getPosterUrl(item.poster_path, 'w185')}
                       alt={title}
-                      className="w-10 h-14 object-cover rounded-lg shadow group-hover:scale-105 transition-transform duration-200 bg-slate-800"
+                      className="w-10 h-14 object-cover rounded-lg shadow shrink-0 group-hover:scale-105 transition-transform duration-200 bg-slate-800"
                     />
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-medium text-slate-100 group-hover:text-amber-400 transition-colors truncate">
+                      <h4 className="text-xs sm:text-sm font-semibold text-slate-100 group-hover:text-amber-400 transition-colors truncate">
                         {title}
                       </h4>
-                      <div className="flex items-center space-x-2.5 mt-1 text-xs text-slate-400">
-                        <span className="flex items-center space-x-1 px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700/50 text-[11px]">
+                      <div className="flex flex-wrap items-center gap-2 mt-1 text-xs text-slate-400">
+                        <span className="flex items-center space-x-1 px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700/50 text-[10px]">
                           {item.media_type === 'movie' ? (
                             <Film className="w-3 h-3 text-amber-400 inline mr-1" />
                           ) : (
@@ -125,7 +125,7 @@ export const InstantSearch: React.FC = () => {
                         </span>
                         {year && <span>{year}</span>}
                         {item.vote_average > 0 && (
-                          <span className="flex items-center text-amber-400 font-semibold">
+                          <span className="flex items-center text-amber-400 font-semibold text-xs">
                             <Star className="w-3 h-3 fill-amber-400 mr-0.5 inline" />
                             {item.vote_average.toFixed(1)}
                           </span>
@@ -137,7 +137,7 @@ export const InstantSearch: React.FC = () => {
               })}
               <button
                 onClick={handleFullSearch}
-                className="w-full px-4 py-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-medium text-xs text-center transition-colors block"
+                className="w-full px-4 py-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-semibold text-xs text-center transition-colors block"
               >
                 View all results for "{searchQuery}" &rarr;
               </button>

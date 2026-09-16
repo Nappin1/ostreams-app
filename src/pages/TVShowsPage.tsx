@@ -215,7 +215,7 @@ export const TVShowsPage: React.FC = () => {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-3.5 sm:gap-4 md:gap-5 lg:gap-6">
         {tvShows.map((tv, idx) => (
           <MediaCard key={`${tv.id}-${idx}`} item={tv} isGrid />
         ))}
