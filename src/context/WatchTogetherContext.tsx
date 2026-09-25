@@ -95,12 +95,23 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
   const broadcastChannelRef = useRef<BroadcastChannel | null>(null);
   const myUserIdRef = useRef<string>(Math.random().toString(36).substring(2, 10));
 
+  // Mutable refs to prevent stale closures and infinite loop re-subscriptions
+  const isHostRef = useRef(isHost);
+  const membersRef = useRef(members);
+  const syncStateRef = useRef(syncState);
+  const chatMessagesRef = useRef(chatMessages);
+  const processedMsgIdsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => { isHostRef.current = isHost; }, [isHost]);
+  useEffect(() => { membersRef.current = members; }, [members]);
+  useEffect(() => { syncStateRef.current = syncState; }, [syncState]);
+  useEffect(() => { chatMessagesRef.current = chatMessages; }, [chatMessages]);
+
   const setUserName = (name: string) => {
     const trimmed = name.trim() || generateRandomName();
     setUserNameState(trimmed);
     localStorage.setItem(USER_NAME_KEY, trimmed);
     
-    // Notify room of name update if in room
     if (roomId) {
       setMembers((prev) =>
         prev.map((m) => (m.id === myUserIdRef.current ? { ...m, name: trimmed } : m))
@@ -119,12 +130,24 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  // Message Deduplication Helper
+  const isDuplicateMessage = (msg: PeerMessage): boolean => {
+    const id = msg.payload?.chatMessage?.id || `${msg.timestamp}-${msg.senderId}-${msg.type}`;
+    if (!id) return false;
+    if (processedMsgIdsRef.current.has(id)) return true;
+    processedMsgIdsRef.current.add(id);
+    if (processedMsgIdsRef.current.size > 500) {
+      const first = processedMsgIdsRef.current.values().next().value;
+      if (first) processedMsgIdsRef.current.delete(first);
+    }
+    return false;
+  };
+
   // Helper to add chat message locally
   const addChatMessage = useCallback((msg: ChatMessage) => {
     setChatMessages((prev) => {
-      // Prevent duplicates
       if (prev.some((m) => m.id === msg.id)) return prev;
-      return [...prev.slice(-99), msg]; // Keep last 100 messages
+      return [...prev.slice(-99), msg];
     });
   }, []);
 
@@ -134,12 +157,11 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
       id: Math.random().toString(36).substring(2, 9),
       emoji,
       senderName,
-      x: Math.floor(15 + Math.random() * 70), // percentage offset
+      x: Math.floor(15 + Math.random() * 70),
     };
 
     setFloatingReactions((prev) => [...prev, newReaction]);
 
-    // Auto-remove reaction after animation completes (3 seconds)
     setTimeout(() => {
       setFloatingReactions((prev) => prev.filter((r) => r.id !== newReaction.id));
     }, 3000);
@@ -147,6 +169,10 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Broadcast message to all connected peers and broadcast channel
   const broadcastPeerMessage = useCallback((msg: PeerMessage) => {
+    // Register message id locally so we ignore echo
+    const msgId = msg.payload?.chatMessage?.id || `${msg.timestamp}-${msg.senderId}-${msg.type}`;
+    if (msgId) processedMsgIdsRef.current.add(msgId);
+
     // Send to BroadcastChannel
     if (broadcastChannelRef.current) {
       try {
@@ -159,13 +185,13 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
     // If host, send to all connected guests
     connectionsRef.current.forEach((conn) => {
       if (conn.open) {
-        conn.send(msg);
+        try { conn.send(msg); } catch (e) { console.error('Send error:', e); }
       }
     });
 
     // If guest, send to host
     if (hostConnRef.current && hostConnRef.current.open) {
-      hostConnRef.current.send(msg);
+      try { hostConnRef.current.send(msg); } catch (e) { console.error('Send host error:', e); }
     }
   }, []);
 
@@ -189,6 +215,7 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
       peerRef.current = null;
     }
 
+    processedMsgIdsRef.current.clear();
     setRoomId(null);
     setIsHost(false);
     setMyPeerId(null);
@@ -199,12 +226,14 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
     setError(null);
   }, []);
 
-  // Handle incoming peer messages
+  // Handle incoming peer messages (using refs for zero stale closures)
   const handleIncomingMessage = useCallback(
     (msg: PeerMessage, fromConn?: DataConnection) => {
+      if (!msg || isDuplicateMessage(msg)) return;
+
       switch (msg.type) {
         case 'JOIN_REQUEST': {
-          if (!isHost) break;
+          if (!isHostRef.current) break;
           const newMember: Participant = {
             id: msg.senderId,
             name: msg.senderName || 'Guest',
@@ -217,7 +246,6 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
             const exists = prev.some((m) => m.id === newMember.id);
             const updated = exists ? prev : [...prev, newMember];
 
-            // Send current full room state to the newly joined guest
             if (fromConn && fromConn.open) {
               const stateMsg: PeerMessage = {
                 type: 'ROOM_STATE',
@@ -225,14 +253,13 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
                 timestamp: Date.now(),
                 payload: {
                   members: updated,
-                  syncState,
-                  chatHistory: chatMessages,
+                  syncState: syncStateRef.current,
+                  chatHistory: chatMessagesRef.current,
                 },
               };
               fromConn.send(stateMsg);
             }
 
-            // Notify everyone of new member
             const systemMsg: ChatMessage = {
               id: Math.random().toString(36).substring(2, 9),
               senderId: 'system',
@@ -243,7 +270,6 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
             };
             addChatMessage(systemMsg);
 
-            // Broadcast updated members list & system chat to all
             const memberJoinedMsg: PeerMessage = {
               type: 'MEMBER_JOINED',
               senderId: myUserIdRef.current,
@@ -307,8 +333,7 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
             });
           }
 
-          // If host receives from guest, relay to all other guests
-          if (isHost && fromConn) {
+          if (isHostRef.current && fromConn) {
             connectionsRef.current.forEach((c) => {
               if (c.open && c.peer !== fromConn.peer) {
                 c.send(msg);
@@ -323,7 +348,7 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
             setSyncState((prev) => (prev ? { ...prev, ...msg.payload, updatedAt: Date.now() } : null));
           }
 
-          if (isHost && fromConn) {
+          if (isHostRef.current && fromConn) {
             connectionsRef.current.forEach((c) => {
               if (c.open && c.peer !== fromConn.peer) {
                 c.send(msg);
@@ -338,7 +363,7 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
             addChatMessage(msg.payload.chatMessage);
           }
 
-          if (isHost && fromConn) {
+          if (isHostRef.current && fromConn) {
             connectionsRef.current.forEach((c) => {
               if (c.open && c.peer !== fromConn.peer) {
                 c.send(msg);
@@ -353,7 +378,7 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
             triggerFloatingReaction(msg.payload.emoji, msg.senderName);
           }
 
-          if (isHost && fromConn) {
+          if (isHostRef.current && fromConn) {
             connectionsRef.current.forEach((c) => {
               if (c.open && c.peer !== fromConn.peer) {
                 c.send(msg);
@@ -367,7 +392,7 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
           break;
       }
     },
-    [isHost, syncState, chatMessages, addChatMessage, triggerFloatingReaction]
+    [addChatMessage, triggerFloatingReaction]
   );
 
   // Init BroadcastChannel for local tab multi-window sync
@@ -395,7 +420,6 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsConnecting(true);
     setError(null);
 
-    // Generate 6-digit room code
     const rawCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     const code = formatRoomCode(rawCode);
     const peerId = `gostream-room-${code.toLowerCase()}`;
@@ -460,9 +484,7 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
 
         peer.on('error', (err) => {
           console.warn('Peer error during room creation:', err);
-          // If Peer ID is taken or server issue, fallback to client-assigned ID host
           if (err.type === 'unavailable-id') {
-            // Room code already exists, resolve with existing code or recreate
             const fallbackPeer = new Peer({ debug: 1 });
             peerRef.current = fallbackPeer;
             fallbackPeer.on('open', (id) => {
@@ -531,7 +553,6 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
 
           initBroadcastChannel(code);
 
-          // Connect to host
           const conn = peer.connect(targetPeerId, {
             reliable: true,
           });
@@ -540,7 +561,6 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
 
           conn.on('open', () => {
             setIsConnecting(false);
-            // Send join request to host
             const joinMsg: PeerMessage = {
               type: 'JOIN_REQUEST',
               senderId: myUserIdRef.current,
@@ -550,7 +570,6 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
             };
             conn.send(joinMsg);
 
-            // Also post join request over local BroadcastChannel
             if (broadcastChannelRef.current) {
               broadcastChannelRef.current.postMessage(joinMsg);
             }
@@ -578,13 +597,11 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
 
         peer.on('error', (err) => {
           console.warn('Peer guest error:', err);
-          // If direct Peer ID fails, we still allow BroadcastChannel local join
           initBroadcastChannel(code);
           setRoomId(code);
           setIsHost(false);
           setIsConnecting(false);
 
-          // Broadcast local join request
           const joinMsg: PeerMessage = {
             type: 'JOIN_REQUEST',
             senderId: myUserIdRef.current,
@@ -669,12 +686,12 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Broadcast Playback Sync Signal
   const broadcastPlaybackSync = (time?: number, playing: boolean = true) => {
-    if (!roomId || !syncState) return;
+    if (!roomId || !syncStateRef.current) return;
 
     const updatedState: WatchSyncState = {
-      ...syncState,
+      ...syncStateRef.current,
       isPlaying: playing,
-      playbackTime: time ?? syncState.playbackTime,
+      playbackTime: time ?? syncStateRef.current.playbackTime,
       updatedAt: Date.now(),
     };
 
@@ -699,8 +716,9 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
   const sendChatMessage = (text: string) => {
     if (!text.trim() || !roomId) return;
 
+    const msgId = Math.random().toString(36).substring(2, 9);
     const chatMsg: ChatMessage = {
-      id: Math.random().toString(36).substring(2, 9),
+      id: msgId,
       senderId: myUserIdRef.current,
       senderName: userName,
       senderColor: userColor,
@@ -758,7 +776,6 @@ export const WatchTogetherProvider: React.FC<{ children: React.ReactNode }> = ({
     if (roomParam) {
       setIsRoomModalOpen(true);
       joinRoom(roomParam);
-      // Clean query param from URL bar without reload
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }

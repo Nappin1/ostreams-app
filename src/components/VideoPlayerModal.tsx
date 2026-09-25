@@ -11,7 +11,7 @@ import { FloatingReactions } from './FloatingReactions';
 
 export const VideoPlayerModal: React.FC = () => {
   const { playerState, closePlayer, activeServerId, setActiveServerId, playMedia } = useApp();
-  const { roomId, broadcastMediaChange, floatingReactions } = useWatchTogether();
+  const { roomId, syncState, broadcastMediaChange, floatingReactions } = useWatchTogether();
 
   const [iframeKey, setIframeKey] = useState(0);
   const [seasonData, setSeasonData] = useState<TVSeasonDetails | null>(null);
@@ -35,15 +35,24 @@ export const VideoPlayerModal: React.FC = () => {
   // Broadcast media change to watch together room when player opens or changes media
   useEffect(() => {
     if (playerState?.isOpen && media && roomId) {
-      broadcastMediaChange(
-        media,
-        isTv ? season : undefined,
-        isTv ? episode : undefined,
-        playerState.episodeTitle,
-        activeServerId
-      );
+      const targetSeason = isTv ? season : undefined;
+      const targetEpisode = isTv ? episode : undefined;
+
+      if (
+        syncState?.media?.id !== media.id ||
+        syncState?.season !== targetSeason ||
+        syncState?.episode !== targetEpisode
+      ) {
+        broadcastMediaChange(
+          media,
+          targetSeason,
+          targetEpisode,
+          playerState.episodeTitle,
+          activeServerId
+        );
+      }
     }
-  }, [playerState?.isOpen, media?.id, season, episode, activeServerId]);
+  }, [playerState?.isOpen, media?.id, season, episode, activeServerId, roomId]);
 
   // Fetch season and total seasons data when player is active for TV shows
   useEffect(() => {

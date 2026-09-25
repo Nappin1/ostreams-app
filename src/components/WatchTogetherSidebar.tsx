@@ -48,33 +48,47 @@ export const WatchTogetherSidebar: React.FC<WatchTogetherSidebarProps> = ({ onRe
   // Auto-scroll chat to bottom when new messages arrive
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      requestAnimationFrame(() => {
+        if (chatContainerRef.current) {
+          chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+      });
     }
-  }, [chatMessages]);
+  }, [chatMessages.length]);
 
   // Sync player state when room syncState changes from host/other member
   useEffect(() => {
     if (!syncState || !syncState.media) return;
 
-    // Check if player is currently showing different media
+    const isTv = syncState.media.media_type === 'tv' || (!syncState.media.title && !!syncState.media.name);
+    const targetSeason = isTv ? (syncState.season || 1) : undefined;
+    const targetEpisode = isTv ? (syncState.episode || 1) : undefined;
+
     const currentMediaId = playerState?.media?.id;
     const currentSeason = playerState?.season;
     const currentEpisode = playerState?.episode;
 
     if (
       currentMediaId !== syncState.media.id ||
-      currentSeason !== syncState.season ||
-      currentEpisode !== syncState.episode
+      currentSeason !== targetSeason ||
+      currentEpisode !== targetEpisode
     ) {
-      // Sync media player
       playMedia(
         syncState.media,
-        syncState.season || 1,
-        syncState.episode || 1,
+        targetSeason,
+        targetEpisode,
         syncState.episodeTitle
       );
     }
-  }, [syncState, playerState, playMedia]);
+  }, [
+    syncState?.media?.id,
+    syncState?.season,
+    syncState?.episode,
+    playerState?.media?.id,
+    playerState?.season,
+    playerState?.episode,
+    playMedia,
+  ]);
 
   if (!roomId) return null;
 
