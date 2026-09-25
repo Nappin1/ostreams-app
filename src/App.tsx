@@ -3,7 +3,9 @@ import { DetailsModal } from './components/DetailsModal';
 import { DMCAModal } from './components/DMCAModal';
 import { Navbar } from './components/Navbar';
 import { VideoPlayerModal } from './components/VideoPlayerModal';
+import { WatchTogetherModal } from './components/WatchTogetherModal';
 import { AppProvider, useApp } from './context/AppContext';
+import { WatchTogetherProvider } from './context/WatchTogetherContext';
 import { ExplorePage } from './pages/ExplorePage';
 import { HistoryPage } from './pages/HistoryPage';
 import { HomePage } from './pages/HomePage';
@@ -62,6 +64,7 @@ const MainContent: React.FC = () => {
       {/* Global Modals */}
       <DetailsModal />
       <VideoPlayerModal />
+      <WatchTogetherModal />
       <DMCAModal />
     </div>
   );
@@ -70,7 +73,9 @@ const MainContent: React.FC = () => {
 export function App() {
   return (
     <AppProvider>
-      <MainContent />
+      <WatchTogetherProvider>
+        <MainContent />
+      </WatchTogetherProvider>
     </AppProvider>
   );
 }

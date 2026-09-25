@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Bookmark, Clock, Compass, Film, Home, Info, Menu, Play, Tv, X } from 'lucide-react';
 import { useApp, type ActivePage } from '../context/AppContext';
 import { InstantSearch } from './InstantSearch';
+import { WatchTogetherBadge } from './WatchTogetherBadge';
 
 export const Navbar: React.FC = () => {
   const { activePage, setActivePage, watchlist, watchHistory, setIsDMCAModalOpen } = useApp();
@@ -41,10 +42,11 @@ export const Navbar: React.FC = () => {
                 <button
                   key={item.id}
                   onClick={() => setActivePage(item.id)}
-                  className={`px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${isActive
+                  className={`px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 flex items-center space-x-2 ${
+                    isActive
                       ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-sm'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                    }`}
+                  }`}
                 >
                   {item.icon}
                   <span>{item.label}</span>
@@ -59,8 +61,9 @@ export const Navbar: React.FC = () => {
           </nav>
         </div>
 
-        {/* Right Section: Search & DMCA */}
+        {/* Right Section: Watch Together, Search & DMCA */}
         <div className="flex items-center space-x-2 sm:space-x-3 flex-1 justify-end max-w-xs sm:max-w-md min-w-0">
+          <WatchTogetherBadge />
           <InstantSearch />
 
           {/* DMCA / Info Icon */}
@@ -94,10 +97,11 @@ export const Navbar: React.FC = () => {
                   setActivePage(item.id);
                   setMobileMenuOpen(false);
                 }}
-                className={`w-full px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-between ${isActive
+                className={`w-full px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-between ${
+                  isActive
                     ? 'bg-amber-500/15 text-amber-400 border border-amber-500/25'
                     : 'text-slate-300 hover:bg-slate-800/60'
-                  }`}
+                }`}
               >
                 <div className="flex items-center space-x-3">
                   {item.icon}

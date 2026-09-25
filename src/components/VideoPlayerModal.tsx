@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, ChevronLeft, ChevronRight, RefreshCw, X } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useWatchTogether } from '../context/WatchTogetherContext';
 import { getEmbedUrl, PLAYER_SOURCES } from '../services/player';
 import { getTVDetails, getTVSeasonDetails } from '../services/tmdb';
 import type { TVSeasonDetails } from '../types/tmdb';
+import { WatchTogetherSidebar } from './WatchTogetherSidebar';
+import { WatchTogetherBadge } from './WatchTogetherBadge';
+import { FloatingReactions } from './FloatingReactions';
 
 export const VideoPlayerModal: React.FC = () => {
   const { playerState, closePlayer, activeServerId, setActiveServerId, playMedia } = useApp();
+  const { roomId, broadcastMediaChange, floatingReactions } = useWatchTogether();
+
   const [iframeKey, setIframeKey] = useState(0);
   const [seasonData, setSeasonData] = useState<TVSeasonDetails | null>(null);
   const [totalSeasons, setTotalSeasons] = useState<number>(1);
@@ -25,6 +31,19 @@ export const VideoPlayerModal: React.FC = () => {
   const season = playerState?.season || 1;
   const episode = playerState?.episode || 1;
   const isTv = !!media && (media.media_type === 'tv' || (!media.title && !!media.name));
+
+  // Broadcast media change to watch together room when player opens or changes media
+  useEffect(() => {
+    if (playerState?.isOpen && media && roomId) {
+      broadcastMediaChange(
+        media,
+        isTv ? season : undefined,
+        isTv ? episode : undefined,
+        playerState.episodeTitle,
+        activeServerId
+      );
+    }
+  }, [playerState?.isOpen, media?.id, season, episode, activeServerId]);
 
   // Fetch season and total seasons data when player is active for TV shows
   useEffect(() => {
@@ -47,7 +66,7 @@ export const VideoPlayerModal: React.FC = () => {
         }
       } catch (err) {
         console.error('Error fetching season data for player:', err);
-      } finally {
+      } flex: {
         if (isMounted) setLoadingEpisodes(false);
       }
     };
@@ -129,8 +148,10 @@ export const VideoPlayerModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: Server Provider Selector & Close */}
+        {/* Right: Watch Together status, Server Selector & Close */}
         <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+          <WatchTogetherBadge />
+
           <select
             value={activeServerId}
             onChange={(e) => {
@@ -164,16 +185,25 @@ export const VideoPlayerModal: React.FC = () => {
         </div>
       </header>
 
-      {/* 2. Main Video Frame Container */}
-      <div className="relative flex-1 bg-black w-full h-full flex items-center justify-center overflow-hidden">
-        <iframe
-          key={`${embedUrl}-${iframeKey}`}
-          src={embedUrl}
-          title={title}
-          allowFullScreen
-          allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
-          className="w-full h-full border-0"
-        />
+      {/* 2. Main Content Area: Video Container + Live Watch Together Sidebar */}
+      <div className="relative flex-1 bg-black w-full h-full flex overflow-hidden">
+        {/* Video Player Frame */}
+        <div className="relative flex-1 bg-black w-full h-full flex items-center justify-center overflow-hidden">
+          <iframe
+            key={`${embedUrl}-${iframeKey}`}
+            src={embedUrl}
+            title={title}
+            allowFullScreen
+            allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
+            className="w-full h-full border-0"
+          />
+
+          {/* Animated Floating Emojis Overlay */}
+          <FloatingReactions reactions={floatingReactions} />
+        </div>
+
+        {/* Live Watch Together Sidebar */}
+        {roomId && <WatchTogetherSidebar onReloadPlayer={handleReload} />}
       </div>
 
       {/* 3. Dedicated Bottom Binging Bar (TV Shows) for Mobile & Desktop */}
